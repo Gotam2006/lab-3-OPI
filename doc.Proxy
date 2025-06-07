@@ -1,0 +1,91 @@
+#include <iostream>
+
+/**
+ * @brief Абстрактний інтерфейс Subject.
+ * Оголошує метод request(), який буде викликатися клієнтом.
+ */
+class Subject {
+public:
+    virtual ~Subject() = default;
+
+    /**
+     * @brief Виконує запит.
+     */
+    virtual void request() = 0;
+};
+
+/**
+ * @brief Клас RealSubject — реальна реалізація Subject.
+ * Виконує основну роботу.
+ */
+class RealSubject : public Subject {
+public:
+    /**
+     * @brief Реалізація методу request.
+     */
+    void request() override {
+        std::cout << "RealSubject: Handling request.\n";
+    }
+};
+
+/**
+ * @brief Клас Proxy — контролює доступ до RealSubject.
+ * Може додавати логіку контролю доступу, кешування, ліньку ініціалізацію.
+ */
+class Proxy : public Subject {
+private:
+    RealSubject* realSubject; ///< Вказівник на реальний об’єкт
+
+    /**
+     * @brief Перевірка доступу перед викликом реального об’єкта.
+     */
+    void checkAccess() {
+        std::cout << "Proxy: Checking access prior to firing a real request.\n";
+    }
+
+    /**
+     * @brief Логування після виклику реального об’єкта.
+     */
+    void logAccess() {
+        std::cout << "Proxy: Logging the time of request.\n";
+    }
+
+public:
+    /**
+     * @brief Конструктор Proxy.
+     * Ініціалізує realSubject як nullptr для лінької ініціалізації.
+     */
+    Proxy() : realSubject(nullptr) {}
+
+    /**
+     * @brief Деструктор Proxy.
+     * Звільняє пам’ять realSubject, якщо вона була створена.
+     */
+    ~Proxy() {
+        delete realSubject;
+    }
+
+    /**
+     * @brief Перевизначення методу request.
+     * Забезпечує контроль доступу та делегує виклик реальному об’єкту.
+     */
+    void request() override {
+        if (!realSubject) {
+            realSubject = new RealSubject();
+        }
+        checkAccess();
+        realSubject->request();
+        logAccess();
+    }
+};
+
+/**
+ * @brief Тестування роботи Proxy.
+ */
+int main() {
+    Proxy proxy;
+    proxy.request();
+
+    return 0;
+}
+
